@@ -1,0 +1,8 @@
+[package]
+name = "ffmpeg_ffi_test"
+version = "0.1.0"
+authors = ["Jan Ekström <jeebjp@gmail.com>"]
+build = "build.rs"
+
+[dependencies]
+libc = "0.2.0"
