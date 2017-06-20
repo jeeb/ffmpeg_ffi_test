@@ -1,24 +1,34 @@
 extern crate bindgen;
+extern crate pkg_config;
 
 use std::env;
 use std::path::PathBuf;
 
 fn main() {
-    let mut ffmpeg_lib_path     = PathBuf::from(env::var("FFMPEG_PREFIX").unwrap());
-    ffmpeg_lib_path.push("lib");
-    let mut ffmpeg_include_path = PathBuf::from(env::var("FFMPEG_PREFIX").unwrap());
-    ffmpeg_include_path.push("include");
+    let used_libraries = ["libavcodec", "libavformat", "libavutil"];
+    let mut include_paths = Vec::new();
 
-    println!("cargo:rustc-link-lib=avformat");
-    println!("cargo:rustc-link-lib=avcodec");
-    println!("cargo:rustc-link-lib=avutil");
-    println!("cargo:rustc-link-search=native={}", ffmpeg_lib_path.display());
+    for library in used_libraries.iter() {
+        if let Ok(lib) = pkg_config::find_library(library) {
+            for path in &lib.include_paths {
+                include_paths.push(format!("-I{}", path.display()));
+                println!("cargo:include={}", path.display());
+            }
+
+            for path in &lib.link_paths {
+                println!("cargo:rustc-link-search=native={}", path.display());
+            }
+
+            for lib in &lib.libs {
+                println!("cargo:rustc-link-lib={}", lib);
+            }
+        }
+    }
 
     let bindings = bindgen::Builder::default()
         .no_unstable_rust()
-        .clang_arg(format!("-I{}", ffmpeg_include_path.display()))
+        .clang_args(include_paths)
         .header("./helpers/bindings_required.h")
-        .opaque_type("pthread.*")
         .generate()
         .expect("Unable to generate bindings");
 
