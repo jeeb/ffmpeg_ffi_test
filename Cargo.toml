@@ -5,8 +5,8 @@ authors = ["Jan Ekström <jeebjp@gmail.com>"]
 build = "build.rs"
 
 [dependencies]
-libc = "0.2.20"
+libc = "0.2.65"
 
 [build-dependencies]
-bindgen = "0.25.5"
-pkg-config = "0.3.9"
+bindgen = "0.51.1"
+pkg-config = "0.3.17"
